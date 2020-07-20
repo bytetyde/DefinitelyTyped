@@ -8,7 +8,6 @@ import {
     dateFnsLocalizer,
     move,
     Views,
-    components,
     Navigate,
     View,
     DateRange,
@@ -17,7 +16,7 @@ import {
     EventProps,
     EventWrapperProps,
     NavigateAction,
-    Culture, DayLayoutAlgorithm, DayLayoutFunction,
+    Culture, DayLayoutAlgorithm, DayLayoutFunction, TimeSlotWrapperProps, TimeSlotMetrics, Accessors,
 } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 
@@ -252,6 +251,9 @@ class CalendarResource {
                         },
                         toolbar: Toolbar,
                         eventWrapper: EventWrapper,
+                        timeSlotWrapper: (props: TimeSlotWrapperProps) => {
+                            return <TimeSlotWrapper {...props} />
+                        }
                     }}
                     dayPropGetter={customDayPropGetter}
                     slotPropGetter={customSlotPropGetter}
@@ -338,8 +340,8 @@ const customGroupSlotPropGetter = () => {
 const customLayoutAlgorithm: DayLayoutFunction<CalendarEvent> = (args: {
     events: CalendarEvent[],
     minimumStartDifference: any,
-    slotMetrics: any,
-    accessors: any,
+    slotMetrics: TimeSlotMetrics,
+    accessors: Accessors,
 }) => {
     // This is where the events would get styled in an actual algorithm, but for TS test we just want to confirm it returns
     return args.events.map(e => {
@@ -362,6 +364,15 @@ function EventWrapper(props: EventWrapperProps<CalendarEvent>) {
         <div style={style}>
             <div>{continuesEarlier}-{label}-{accessors.title && event && accessors.title(event)}</div>
         </div>
+    );
+}
+
+function TimeSlotWrapper(props: TimeSlotWrapperProps) {
+    const { value, children } = props;
+    return (
+        <>
+            {children}
+        </>
     );
 }
 

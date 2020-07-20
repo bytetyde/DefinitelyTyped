@@ -1,7 +1,7 @@
 import { Calendar, CalendarProps, Components, Event, stringOrDate } from '../../index';
 import * as React from 'react';
 
-export interface withDragAndDropProps<TEvent extends object = Event> {
+export interface withDragAndDropProps<TEvent extends Event = Event> {
   onEventDrop?: (args: { event: TEvent, start: stringOrDate, end: stringOrDate, allDay: boolean }) => void;
   onEventResize?: (args: { event: TEvent, start: stringOrDate, end: stringOrDate, allDay: boolean }) => void;
   onDragStart?: (args: { event: TEvent, action: 'resize' | 'move', direction: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' }) => void;
@@ -17,7 +17,7 @@ export interface withDragAndDropProps<TEvent extends object = Event> {
   step?: number;
 }
 
-declare class DragAndDropCalendar<TEvent extends object = Event, TResource extends object = object>
+declare class DragAndDropCalendar<TEvent extends Event = Event, TResource extends object = object>
   extends React.Component<CalendarProps<TEvent, TResource> & withDragAndDropProps<TEvent>> {}
 
 declare function withDragAndDrop(calendar: typeof Calendar): typeof DragAndDropCalendar;

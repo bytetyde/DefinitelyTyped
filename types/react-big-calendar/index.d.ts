@@ -37,11 +37,11 @@ export type ViewsProps = View[] | {
     month?: boolean | React.ComponentType<any> & ViewStatic,
     week?: boolean | React.ComponentType<any> & ViewStatic
 };
-export type DayLayoutFunction<TEvent extends object = Event> = (_: {
+export type DayLayoutFunction<TEvent extends Event = Event> = (_: {
     events: TEvent[],
     minimumStartDifference: number,
-    slotMetrics: any,
-    accessors: any,
+    slotMetrics: TimeSlotMetrics,
+    accessors: Accessors,
 }) => Array<{ event: TEvent, style: React.CSSProperties }>;
 export type DayLayoutAlgorithm = 'overlap' | 'no-overlap';
 export type NavigateAction = 'PREV' | 'NEXT' | 'TODAY' | 'DATE';
@@ -145,12 +145,12 @@ export interface ResourceHeaderProps {
     resource: object;
 }
 
-export interface Components<TEvent extends object = Event> {
+export interface Components<TEvent extends Event = Event> {
     event?: React.ComponentType<EventProps<TEvent>>;
     eventWrapper?: React.ComponentType<EventWrapperProps<TEvent>>;
     eventContainerWrapper?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
     dateCellWrapper?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
-    timeSlotWrapper?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
+    timeSlotWrapper?: React.ComponentType<TimeSlotWrapperProps>;
     timeGutterHeader?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
     timeGutterWrapper?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
     toolbar?: React.ComponentType<ToolbarProps>;
@@ -190,12 +190,12 @@ export interface ToolbarProps {
     children?: React.ReactNode;
 }
 
-export interface EventProps<TEvent extends object = Event> {
+export interface EventProps<TEvent extends Event = Event> {
     event: TEvent;
     title: string;
 }
 
-export interface EventWrapperProps<TEvent extends object = Event> {
+export interface EventWrapperProps<TEvent extends Event = Event> {
     // https://github.com/intljusticemission/react-big-calendar/blob/27a2656b40ac8729634d24376dff8ea781a66d50/src/TimeGridEvent.js#L28
     style?: React.CSSProperties & { xOffset: number };
     className: string;
@@ -218,6 +218,11 @@ export interface EventWrapperProps<TEvent extends object = Event> {
     label: string;
     continuesEarlier: boolean;
     continuesLater: boolean;
+}
+
+export interface TimeSlotWrapperProps {
+    children?: React.ReactNode;
+    value: Date;
 }
 
 export interface Messages {
@@ -243,7 +248,7 @@ export type Culture = string;
 export type FormatInput = number | string | Date;
 
 export interface DateLocalizerSpec {
-    firstOfWeek: (culture: Culture) => number;
+    firstOfWeek: (culture?: Culture) => number;
     format: (value: FormatInput, format: string, culture: Culture) => string;
     formats: Formats;
     propType?: Validator<any>;
@@ -252,14 +257,14 @@ export interface DateLocalizerSpec {
 export class DateLocalizer {
     formats: Formats;
     propType: Validator<any>;
-    startOfWeek: (culture: Culture) => number;
+    startOfWeek: (culture?: Culture) => number;
 
     constructor(spec: DateLocalizerSpec);
 
     format(value: FormatInput, format: string, culture: Culture): string;
 }
 
-export interface CalendarProps<TEvent extends object = Event, TResource extends object = object>
+export interface CalendarProps<TEvent extends Event = Event, TResource extends object = object>
     extends React.Props<Calendar<TEvent, TResource>> {
     localizer: DateLocalizer;
 
@@ -340,15 +345,10 @@ export interface MoveOptions {
     today: Date;
 }
 
-export class Calendar<
-    TEvent extends object = Event,
-    TResource extends object = object
-> extends React.Component<CalendarProps<TEvent, TResource>> {}
+export class Calendar<TEvent extends Event = Event, TResource extends object = object> extends React.Component<
+    CalendarProps<TEvent, TResource>
+> {}
 
-export interface components {
-    dateCellWrapper: React.ComponentType;
-    eventWrapper: React.ComponentType<Event>;
-}
 export function globalizeLocalizer(globalizeInstance: object): DateLocalizer;
 export function momentLocalizer(momentInstance: object): DateLocalizer;
 export function dateFnsLocalizer(config: object): DateLocalizer;
@@ -366,3 +366,92 @@ export interface Views {
     AGENDA: 'agenda';
 }
 export function move(View: ViewStatic | ViewKey, options: MoveOptions): Date;
+
+export interface Accessors<TEvent extends Event = Event> {
+    title?: (event: TEvent) => string;
+    tooltip?: (event: TEvent) => string;
+    allDay?: (event: TEvent) => boolean;
+    start: (event: TEvent) => Date;
+    end: (event: TEvent) => Date;
+    resource?: (event: TEvent) => any;
+    resourceTitle?: (event: TEvent) => any;
+    resourceId?: (event: TEvent) => any;
+}
+
+export interface Bounds {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+}
+
+export interface TimeSlotMetrics {
+    groups: Date[];
+    update: (args: { min: Date; max: Date; step: number; timeslots: number }) => TimeSlotMetrics;
+    dateIsInGroup: (date: Date, groupIndex: number) => boolean;
+
+    nextSlot: (slot: Date) => Date;
+
+    closestSlotToPosition: (percent: number) => Date;
+
+    closestSlotFromPoint: (point: { x: number; y: number }, boundaryRect: Bounds) => Date;
+
+    closestSlotFromDate: (date: Date, offset?: number) => Date;
+
+    startsBeforeDay: (date: Date) => boolean;
+
+    startsAfterDay: (date: Date) => boolean;
+
+    startsBefore: (date: Date) => boolean;
+
+    startsAfter: (date: Date) => boolean;
+
+    getRange: (
+        rangeStart: Date,
+        rangeEnd: Date,
+        ignoreMin?: boolean,
+        ignoreMax?: boolean,
+    ) => {
+        top: number;
+        height: number;
+        start: number;
+        startDate: Date;
+        end: number;
+        endDate: Date;
+    };
+
+    getCurrentTimePosition: (rangeStart: Date) => number;
+}
+
+export interface TimeGridHeaderProps<TEvent extends Event = Event> {
+    range: Array<Date>;
+    events: Array<TEvent>;
+    resources?: any;
+    getNow: () => Date;
+    isOverflowing?: boolean;
+    width?: number;
+    localizer: DateLocalizer;
+    accessors: Accessors;
+    getters: {
+        eventProp?: EventPropGetter<TEvent>;
+        slotProp?: SlotPropGetter;
+        dayProp?: DayPropGetter;
+    };
+    selected?: TEvent;
+    selectable?: boolean | 'ignoreEvents';
+    longPressThreshold?: number;
+    onDrillDown?: (date: Date, view: View) => void;
+    onSelectSlot?: (
+        slots: Date[],
+        slotInfo: {
+            start: stringOrDate;
+            end: stringOrDate;
+            slots: Date[] | string[];
+            action: 'select' | 'click' | 'doubleClick';
+        },
+    ) => void;
+    onDoubleClickEvent?: (event: TEvent, e: React.SyntheticEvent<HTMLElement>) => void;
+    onSelectEvent?: (event: TEvent, e: React.SyntheticEvent<HTMLElement>) => void;
+    getDrilldownView: (targetDate: Date, currentViewName: View, configuredViewNames: View[]) => View;
+    style?: React.CSSProperties;
+}
