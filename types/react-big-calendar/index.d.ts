@@ -18,31 +18,39 @@
 //                 Tom Price <https://github.com/tomtom5152>
 //                 Daniele Carrucciu <https://github.com/catruzz>
 //                 Chris Vandenberg <https://github.com/altruisticsoftware>
+//                 Simon Abbt <https://github.com/bytetyde>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // TypeScript Version: 2.8
 import { Validator } from 'prop-types';
 import * as React from 'react';
 
 export type DayPropGetter = (date: Date, resourceId?: number | string) => React.HTMLAttributes<HTMLDivElement>;
-export type EventPropGetter<T> = (event: T, start: stringOrDate, end: stringOrDate, isSelected: boolean) => React.HTMLAttributes<HTMLDivElement>;
+export type EventPropGetter<T> = (
+    event: T,
+    start: stringOrDate,
+    end: stringOrDate,
+    isSelected: boolean,
+) => React.HTMLAttributes<HTMLDivElement>;
 export type SlotPropGetter = (date: Date, resourceId?: number | string) => React.HTMLAttributes<HTMLDivElement>;
 export type SlotGroupPropGetter = () => React.HTMLAttributes<HTMLDivElement>;
 export type stringOrDate = string | Date;
 export type ViewKey = 'MONTH' | 'WEEK' | 'WORK_WEEK' | 'DAY' | 'AGENDA';
 export type View = 'month' | 'week' | 'work_week' | 'day' | 'agenda';
-export type ViewsProps = View[] | {
-    work_week?: boolean | React.ComponentType<any> & ViewStatic,
-    day?: boolean | React.ComponentType<any> & ViewStatic,
-    agenda?: boolean | React.ComponentType<any> & ViewStatic,
-    month?: boolean | React.ComponentType<any> & ViewStatic,
-    week?: boolean | React.ComponentType<any> & ViewStatic
-};
+export type ViewsProps =
+    | View[]
+    | {
+          work_week?: boolean | (React.ComponentType<any> & ViewStatic);
+          day?: boolean | (React.ComponentType<any> & ViewStatic);
+          agenda?: boolean | (React.ComponentType<any> & ViewStatic);
+          month?: boolean | (React.ComponentType<any> & ViewStatic);
+          week?: boolean | (React.ComponentType<any> & ViewStatic);
+      };
 export type DayLayoutFunction<TEvent extends Event = Event> = (_: {
-    events: TEvent[],
-    minimumStartDifference: number,
-    slotMetrics: TimeSlotMetrics,
-    accessors: Accessors,
-}) => Array<{ event: TEvent, style: React.CSSProperties }>;
+    events: TEvent[];
+    minimumStartDifference: number;
+    slotMetrics: TimeSlotMetrics;
+    accessors: Accessors;
+}) => Array<{ event: TEvent; style: React.CSSProperties }>;
 export type DayLayoutAlgorithm = 'overlap' | 'no-overlap';
 export type NavigateAction = 'PREV' | 'NEXT' | 'TODAY' | 'DATE';
 export interface Event {

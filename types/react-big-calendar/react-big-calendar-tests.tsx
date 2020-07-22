@@ -6,9 +6,6 @@ import {
     momentLocalizer,
     globalizeLocalizer,
     dateFnsLocalizer,
-    move,
-    Views,
-    Navigate,
     View,
     DateRange,
     DateLocalizer,
@@ -16,7 +13,11 @@ import {
     EventProps,
     EventWrapperProps,
     NavigateAction,
-    Culture, DayLayoutAlgorithm, DayLayoutFunction, TimeSlotWrapperProps, TimeSlotMetrics, Accessors,
+    Culture,
+    DayLayoutFunction,
+    TimeSlotWrapperProps,
+    TimeSlotMetrics,
+    Accessors    
 } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 
